@@ -14,6 +14,13 @@ logging.basicConfig(
     filemode = 'a'
 )
 
+result_str = """
+-------------------------------------
+任务id[%s] 服务器[%s]输出结果是:
+%s
+-------------------------------------
+                    """
+
 class BatchTask:
     def __init__(self):
         pass
@@ -45,10 +52,13 @@ class BatchTask:
         pool = ThreadPoolExecutor(config.ThreadPoolNum)
         self.task_id = self.generate_task_id()
         print("task %s running.." %(self.task_id))
+        server_list = config.Server
         if type == 'cmd':
-            server_list = config.Server
             for server in server_list:
                 pool.submit(self.cmd_task, server)
+        elif type == 'putfile' or type == 'getfile':
+            for server in server_list:
+                pool.submit(self.file_task, server, type)
 
 
     def cmd_task(self, server):
@@ -71,12 +81,7 @@ class BatchTask:
         except Exception as e:
             ssh_res = e
 
-        result = """
--------------------------------------
-任务id[%s] 服务器[%s]输出结果是:
-%s
--------------------------------------
-                    """ % (self.task_id, server["host"], ssh_res)
+        result = result_str % (self.task_id, server["host"], ssh_res)
 
         print(result)
 
@@ -84,4 +89,40 @@ class BatchTask:
             logging.debug(result)
 
         ssh.close()
+
+    def file_task(self, server, type):
+        try:
+            t = paramiko.Transport((server["host"], int(server["port"])))
+            t.connect(
+                username = server["username"],
+                password = server["password"],
+            )
+            sftp = paramiko.SFTPClient.from_transport(t)
+            if type == 'putfile':
+                print(self.local_file, self.remote_file)
+                sftp.put(self.local_file, self.remote_file)
+                sftp_res = "file [%s] sends to [%s] succeed!" % (self.local_file, self.remote_file)
+            elif type == 'getfile':
+                download_file_dir = config.DownloadDir
+                if not os.path.isdir("%s/%s" % (download_file_dir, self.task_id)):
+                    os.makedirs("%s/%s" % (download_file_dir, self.task_id))
+
+                filename = "%s.%s" % (server["host"], self.remote_file.split('/')[-1])
+                sftp.get(self.remote_file, "%s/%s/%s" % (download_file_dir, self.task_id, filename))
+                sftp_res = "download remote file [%s] succeed!" % self.remote_file
+
+            t.close()
+        except Exception as e:
+            sftp_res = e
+
+        result = result_str % (self.task_id, server["host"], sftp_res)
+
+        print(result)
+
+        if config.LogApp:
+            logging.debug(result)
+
+
+
+
 

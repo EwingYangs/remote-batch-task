@@ -12,3 +12,6 @@ Server = [
     {"host":"192.168.10.10", "port":"22", "username":"root", "password":"123456"},
     {"host":"192.168.33.10", "port":"22", "username":"vagrant", "password":"vagrant"},
 ]
+
+# 下载文件路径
+DownloadDir = 'download'

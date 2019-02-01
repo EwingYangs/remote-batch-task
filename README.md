@@ -40,7 +40,9 @@
             
            
 - 运行结果
-
+        
+        # python rbt.py -t cmd -c 'df'
+        
         2019-02-01 12:10:38 batch.py[line:84] DEBUG 
         -------------------------------------
         任务id[CWVMenTrbsKcgOBP] 服务器[192.168.33.10]输出结果是:
@@ -83,3 +85,10 @@
         batch_client.batch_putfile('/usr/local/test.py', '/tmp/test.py')
         # 文件下载
         batch_client.batch_getfile('/tmp/test.py')
+        
+- 未完善点
+
+    - 暂时不能用key登录服务器，后续完善
+    - 错误未解决
+    
+            /usr/local/lib/python3.7/site-packages/paramiko/kex_ecdh_nist.py:39: CryptographyDeprecationWarning: encode_point has been deprecated on EllipticCurvePublicNumbers and will be removed in a future version. Please use EllipticCurvePublicKey.public_bytes to obtain both compressed and uncompressed point encoding.

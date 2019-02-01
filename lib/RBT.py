@@ -20,10 +20,14 @@ class RBT:
         if not options.remoteFile:
             print("remoteFile is not null, please input -r ..")
             exit(0)
-        pass
+
+        # 远程批量上传
+        self.batch_client.batch_putfile(options.localFile, options.remoteFile)
 
     def getfile(self, options):
         if not options.remoteFile:
             print("remoteFile is not null, please input -r ..")
             exit(0)
-        pass
+
+        # 远程批量下载
+        self.batch_client.batch_getfile(options.remoteFile)
